@@ -51,7 +51,7 @@
     <ClInclude Include="Source\sample_math.hpp">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\wsi.hpp">
+    <ClInclude Include="Source\wsi.h">
       <Filter>Helpers</Filter>
     </ClInclude>
     <ClInclude Include="Source\wsi_utils.hpp">

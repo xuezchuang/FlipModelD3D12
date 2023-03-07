@@ -13,7 +13,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 ////////////////////////////////////////////////////////////////////////////////
-#include "wsi.hpp"
+#include "wsi.h"
 #include "wsi_utils.hpp"
 
 #if 1 // enable this for older windows versions without multimonitor support

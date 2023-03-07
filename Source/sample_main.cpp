@@ -13,7 +13,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 ////////////////////////////////////////////////////////////////////////////////
-#include "wsi.hpp"
+#include "wsi.h"
 #include "sample_dx12.hpp"
 #include "sample_game.hpp"
 
@@ -356,12 +356,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 		wsi::set_mode(mode, &prefs);
 	}
 
-	swapchain_opts.any_time.overdraw_factor = 8;
+	swapchain_opts.any_time.overdraw_factor = 10;// 12;// 8;
 	swapchain_opts.any_time.cpu_draw_ms = 8;
-	swapchain_opts.create_time.gpu_frame_count = 2;
-	swapchain_opts.create_time.swapchain_buffer_count = 3;
-	swapchain_opts.create_time.use_waitable_object = 1;
-	swapchain_opts.create_time.max_frame_latency = 2;
+	swapchain_opts.create_time.gpu_frame_count = 1;
+	swapchain_opts.create_time.swapchain_buffer_count = 2;
+	swapchain_opts.create_time.use_waitable_object = 0;// 1;
+	swapchain_opts.create_time.max_frame_latency = 1;
 
 	if (initialize_dx12(&swapchain_opts))
 	{

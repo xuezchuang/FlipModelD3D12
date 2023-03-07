@@ -306,9 +306,10 @@ void eviz_gpu_event(const frame_data *frame, eventviz_aux *type, const UINT64 (&
 
 static void wait_for_swap_chain(HANDLE waitable, const char *name)
 {
+	//if (WAIT_TIMEOUT == WaitForSingleObjectEx(waitable, INFINITE, TRUE))
 	if(WAIT_TIMEOUT == WaitForSingleObjectEx(waitable, 1000, TRUE))
 	{
-		//__debugbreak();
+		__debugbreak();
 	}
 }
 
@@ -402,7 +403,7 @@ static bool initialize_dx12_internal()
 		CheckHresult(D3D12CreateDevice(chosenAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&dx12->device)));
 
 		ComPtr<ID3D12InfoQueue> infoQueue;
-
+		
 		if (SUCCEEDED(dx12->device.As(&infoQueue)))
 		{
 			CheckHresult(infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE));
@@ -615,10 +616,8 @@ static bool initialize_dx12_internal()
 
 		auto gpu_base = dx12->constant_heap.Heap()->GetGPUVirtualAddress();
 
-		dx12->cube_vbuf = MakeVertexBufferView(gpu_base, constant_data->cube_vbuf,
-			sizeof(constant_data->cube_vbuf), constant_data);
-		dx12->cube_ibuf = MakeIndexBufferView(gpu_base, constant_data->cube_ibuf,
-			sizeof(constant_data->cube_ibuf), constant_data, DXGI_FORMAT_R16_UINT);
+		dx12->cube_vbuf = MakeVertexBufferView(gpu_base, constant_data->cube_vbuf,sizeof(constant_data->cube_vbuf), constant_data);
+		dx12->cube_ibuf = MakeIndexBufferView(gpu_base, constant_data->cube_ibuf,sizeof(constant_data->cube_ibuf), constant_data, DXGI_FORMAT_R16_UINT);
 
 		memcpy(constant_data->cube_vbuf, cube_vertices, sizeof(cube_vertices));
 		memcpy(constant_data->cube_ibuf, cube_indices, sizeof(cube_indices));
@@ -711,11 +710,14 @@ static void present_dx12(frame_data *frame, UINT64 FrameBeginTime, int vsync, dx
 
 	auto present_call = eviz->Start(EventViz::kCpuQueue, &event_types[EVENT_TYPE_PRESENT_CALL]);
 	chain->Present(SyncInterval, 0);
+	//Sleep(10);
 	eviz->End(present_call);
 
 	UINT color_index = frame->backbuffer_index % NUM_FRAME_COLORS;
 
 	auto present_entry = eviz->Start(EventViz::kPresentQueue, &event_types[EVENT_TYPE_COLOR0 + color_index], frame->render_id);
+	static int cpupresent = 0;
+	cpupresent++;
 	pqs->PostPresent(chain, SyncInterval, FrameBeginTime, present_entry);
 	
 	dequeue_presents(out_stats);
@@ -1371,6 +1373,8 @@ void render_game_dx12(wchar_t *hud_text, game_data *game, float fractional_ticks
 		command_list->ResourceBarrier(1, &TransitionPresentToRenderTarget);
 	}
 
+	//dx12->command_queue->GetClockCalibration(&frame->gpu_clock_origin, &frame->cpu_clock_origin);
+
 	UINT color_index = frame->backbuffer_index % NUM_FRAME_COLORS;
 	if (frame->cpu_clock_origin && timestamps->draw[0]) {
 		eviz_gpu_event(frame, &event_types[EVENT_TYPE_COLOR0 + color_index], timestamps->draw, frame->render_id);
@@ -1391,8 +1395,7 @@ void render_game_dx12(wchar_t *hud_text, game_data *game, float fractional_ticks
 	print_duration("draw_eviz", timestamps->draw_eviz);
 #endif
 
-	dequeue_presents(stats, 1);
-
+	//dequeue_presents(stats, 1);
 	{
 		dx12->command_queue->GetClockCalibration(&frame->gpu_clock_origin, &frame->cpu_clock_origin);
 		frame->render_id = next_event_id();
@@ -1435,6 +1438,7 @@ void render_game_dx12(wchar_t *hud_text, game_data *game, float fractional_ticks
 	}
 
 	present_dx12(frame, CpuFrameStart, vsync_interval, stats);
+	//Sleep(10);
 }
 
 bool set_swapchain_options_dx12(void *pHWND, void *pCoreWindow, float x_dips, float y_dips, float dpi, dx12_swapchain_options *opts)

@@ -17,7 +17,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "wsi.hpp"
+#include "wsi.h"
 
 #include <ctime>
 #include <memory>

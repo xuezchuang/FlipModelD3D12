@@ -379,10 +379,7 @@ void CreateVisualization(EventStream& Stream, UINT FirstVsync, UINT LastVsync, F
 	for (auto it = First; it != Last; ++it)
 	{
 		EventData *Data = it->second.get();
-		if (Data->End &&
-			IntervalsIntersect(
-				StartTime, EndTime,
-				Data->Start, Data->End))
+		if (Data->End &&IntervalsIntersect(StartTime, EndTime,Data->Start, Data->End))
 		{
 			if (Data->Queue == kPresentQueue)
 			{

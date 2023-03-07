@@ -14,7 +14,7 @@
 // under the License.
 ////////////////////////////////////////////////////////////////////////////////
 #include "DX12Helpers.hpp"
-
+#include <string>
 #if D3D12_DYNAMIC_LINK
 
 HMODULE hModuleD3D12;

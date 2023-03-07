@@ -23,6 +23,17 @@
 #include <algorithm>
 #include <deque>
 
+#include <tchar.h>
+#include <strsafe.h>  //for StringCchxxxxx function
+
+#define GRS_USEPRINTF() TCHAR pBuf[1024] = {};TCHAR pszOutput[1024] = {};
+#define GRS_PRINTF(...) \
+    StringCchPrintf(pBuf,1024,__VA_ARGS__);\
+	OutputDebugString(pBuf);
+	//StringCchPrintf(pszOutput,1024,_T("¡¾ID:% 8u¡¿£º%s"),::GetCurrentThreadId(),pBuf);
+	
+
+GRS_USEPRINTF();
 struct PresentQueueStats
 {
 	struct QueueEntry
@@ -43,15 +54,15 @@ struct PresentQueueStats
 	}
 
 	template<class DequeueEntry>
-	HRESULT RetrieveStats(
-		IDXGISwapChain1 *pSwapChain, 
-		DequeueEntry dequeue)
+	HRESULT RetrieveStats(IDXGISwapChain1 *pSwapChain, DequeueEntry dequeue)
 	{
+
 		HRESULT hr;
 
 		DXGI_FRAME_STATISTICS stats = { 0 };
-		while (SUCCEEDED(hr = pSwapChain->GetFrameStatistics(&stats)) &&
-			(stats.PresentCount > LastRetrievedID))
+
+		UINT64 tNow = QpcNow();
+		while (SUCCEEDED(hr = pSwapChain->GetFrameStatistics(&stats)) && (stats.PresentCount > LastRetrievedID))
 		{
 			//assert(stats.PresentCount - LastRetrievedID < MAX_QUEUE_LENGTH);
 
@@ -75,6 +86,12 @@ struct PresentQueueStats
 				}
 
 				e.Dropped = Entry.QueueExitedTime == TIME_STILL_IN_QUEUE;
+				if (e.Dropped)
+				{
+					GRS_PRINTF(_T("Å×ÆúµÚ%dÖ¡\n"), i);
+
+				}
+					
 				dequeue(e);
 			}
 
@@ -138,7 +155,7 @@ private:
 		LastNewID = PresentID;
 	}
 
-	void UpdateEntry(DXGI_FRAME_STATISTICS& stats)
+	void UpdateEntry(const DXGI_FRAME_STATISTICS& stats)
 	{
 		UINT PresentID = stats.PresentCount;
 		UINT EntryIndex = PresentID % MAX_QUEUE_LENGTH;
